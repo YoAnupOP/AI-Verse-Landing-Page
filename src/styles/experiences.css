@@ -1,0 +1,108 @@
+/* experiences.css */
+
+.experiences-section {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  min-height: 100vh; /* Full viewport height for proper pinning */
+}
+
+.section-header {
+  transform: translateZ(0); /* Helps with fixed positioning during scroll */
+}
+
+.indicator-dot {
+  position: relative;
+  padding: 10px;
+  transition: transform 0.3s ease;
+}
+
+.indicator-dot:hover {
+  transform: scale(1.2);
+}
+
+.indicator-dot.active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid #00FFFF;
+  animation: pulse 2s infinite;
+}
+
+.panels-container {
+  display: flex;
+  will-change: transform;
+  height: 100%;
+}
+
+.panel {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5%;
+  transition: opacity 0.5s ease;
+}
+
+.panel-image img {
+  will-change: transform;
+  box-shadow: 0 20px 40px rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+/* Aspect ratio container for images */
+.aspect-w-16 {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+}
+
+.aspect-w-16 img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Animation */
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .panel {
+    padding: 0 1rem;
+  }
+  
+  .panel-content, 
+  .panel-image {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .panel-image {
+    margin-top: 2rem;
+  }
+  
+  .section-header {
+    padding: 1.5rem 0;
+  }
+}
