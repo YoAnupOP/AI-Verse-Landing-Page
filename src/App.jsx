@@ -311,7 +311,6 @@ export default function App() {
           </div>
         </div>
       </section>
-
       {/* Experiences Scroll Slider */}
       <ExperiencesSection />
       
@@ -321,9 +320,9 @@ export default function App() {
             { name: "Sukuna", image: sukunaImg },
             { name: "Eren", image: erenImg },
             { name: "Aizen", image: aizenImg },
+            { name: "Batman", image: batmanImg },
             { name: "Elon Musk", image: elonImg },
             { name: "Hinata", image: hinataImg },
-            { name: "Batman", image: batmanImg },
           ]} />
         </section>
 

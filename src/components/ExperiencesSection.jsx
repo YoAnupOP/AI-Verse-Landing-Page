@@ -1,5 +1,5 @@
 /*Experience Section Component*/
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import chatImg from '../assets/chatrooms.webp';
@@ -13,6 +13,7 @@ const ExperiencesSection = () => {
   const sectionRef = useRef(null);
   const triggerRef = useRef(null);
   const panelsContainer = useRef(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const features = [
     {
@@ -33,81 +34,124 @@ const ExperiencesSection = () => {
   ];
 
   useEffect(() => {
-    const panels = gsap.utils.toArray('.panel');
-    
-    // Create the scroll animation
-    const createHorizontalScrollAnimation = () => {
-      // Clear any existing ScrollTriggers
-      ScrollTrigger.getAll().forEach(st => st.kill());
-      
-      const totalPanels = panels.length;
-      const width = totalPanels * 100;
-
-      // Set the container width to accommodate all panels
-      gsap.set(panelsContainer.current, {
-        width: `${width}%`,
-        display: 'flex'
-      });
-      
-      // Set each panel to fill 100% of the viewport width
-      gsap.set(panels, { width: `${100 / totalPanels}%` });
-
-      // Create the horizontal scroll animation
-      gsap.to(panels, {
-        xPercent: -100 * (totalPanels - 1),
-        ease: "none",
-        scrollTrigger: {
-          trigger: triggerRef.current,
-          pin: true,
-          scrub: 1,
-          snap: 1 / (totalPanels - 1),
-          start: "top top",
-          end: () => `+=${window.innerWidth * (totalPanels - 1)}`,
-          // Add this to your ScrollTrigger setup in ExperiencesSection:
-        markers: false,  // Set to true for debugging
-onEnter: () => console.log('Panel entered'),
-onLeave: () => console.log('Panel left'),
-onEnterBack: () => console.log('Panel entered back'),
-onLeaveBack: () => console.log('Panel left back'),
-          invalidateOnRefresh: true
-        }
-      });
-
-      // Animate each panel's content when it comes into view
-      panels.forEach((panel, i) => {
-        const elements = panel.querySelectorAll('.panel-content, .panel-image');
-        gsap.fromTo(elements, 
-          { 
-            y: 50, 
-            opacity: 0 
-          },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 1,
-            stagger: 0.2,
-            scrollTrigger: {
-              trigger: panel,
-              start: i === 0 ? "top top" : "left center",
-              containerAnimation: ScrollTrigger.getById("scroll-animation"),
-              toggleActions: "play none none reverse"
-            }
-          }
-        );
-      });
-    };
-
-    // Create the animation once everything is loaded
-    createHorizontalScrollAnimation();
-
-    // Recreate the animation on window resize
-    window.addEventListener("resize", createHorizontalScrollAnimation);
+    // Set a small delay to ensure DOM elements are fully rendered
+    const initTimer = setTimeout(() => {
+      initScrollAnimation();
+      setIsInitialized(true);
+    }, 100);
     
     return () => {
-      window.removeEventListener("resize", createHorizontalScrollAnimation);
+      clearTimeout(initTimer);
+      // Clean up any existing ScrollTriggers
       ScrollTrigger.getAll().forEach(st => st.kill());
     };
   }, []);
+
+  const initScrollAnimation = () => {
+    if (!panelsContainer.current) return;
+    
+    const panels = gsap.utils.toArray('.panel');
+    const totalPanels = panels.length;
+    const isMobile = window.innerWidth < 768;
+    
+    // Clean up existing ScrollTriggers first to prevent duplicates
+    ScrollTrigger.getAll().forEach(st => st.kill());
+    
+    // Reset panel container for new animation
+    gsap.set(panelsContainer.current, {
+      width: `${totalPanels * 100}%`,
+      display: 'flex'
+    });
+    
+    // Set each panel width
+    gsap.set(panels, { width: `${100 / totalPanels}%` });
+    
+    // Pre-initialize panel content to be visible for the first panel
+    const firstPanelContent = panels[0].querySelectorAll('.panel-content, .panel-image');
+    gsap.set(firstPanelContent, { y: 0, opacity: 1 });
+    
+    // Create the horizontal scroll animation with improved settings
+    const scrollTween = gsap.to(panels, {
+      xPercent: -100 * (totalPanels - 1),
+      ease: "power1.inOut", // Changed from "none" for smoother movement
+      scrollTrigger: {
+        trigger: triggerRef.current,
+        pin: true,
+        scrub: isMobile ? 0.5 : 0.8, // Lower value for mobile for faster response
+        snap: {
+          snapTo: 1 / (totalPanels - 1),
+          duration: { min: 0.1, max: 0.3 }, // Faster snap duration
+          delay: 0 // No delay for more responsive feel
+        },
+        start: "top top",
+        end: () => `+=${window.innerWidth * (totalPanels - 1)}`,
+        markers: false,
+        invalidateOnRefresh: true,
+        onEnter: () => {
+          // Make sure first panel is immediately visible
+          gsap.to(firstPanelContent, { opacity: 1, y: 0, duration: 0.1 });
+        }
+      }
+    });
+    
+    // Create separate animations for each panel's content
+    panels.forEach((panel, i) => {
+      // Skip the first panel since we've already set it
+      if (i === 0) return;
+      
+      const elements = panel.querySelectorAll('.panel-content, .panel-image');
+      
+      // Create animation that triggers when the panel becomes active
+      ScrollTrigger.create({
+        trigger: panel,
+        containerAnimation: scrollTween,
+        start: "left center-=10%", // Trigger earlier
+        end: "right center+=10%",
+        markers: false,
+        onEnter: () => {
+          gsap.to(elements, {
+            y: 0,
+            opacity: 1,
+            duration: isMobile ? 0.3 : 0.5, // Faster animation on mobile
+            stagger: 0.1,
+            ease: "power2.out"
+          });
+        },
+        onLeave: () => {
+          // Optional: fade out when scrolling away
+          gsap.to(elements, {
+            opacity: 0.5,
+            duration: 0.2
+          });
+        },
+        onEnterBack: () => {
+          gsap.to(elements, {
+            y: 0,
+            opacity: 1,
+            duration: isMobile ? 0.3 : 0.5,
+            stagger: 0.1,
+            ease: "power2.out"
+          });
+        }
+      });
+      
+      // Pre-set these elements to be hidden
+      gsap.set(elements, { y: 30, opacity: 0 });
+    });
+    
+    // Handle window resize to properly reset animations
+    window.addEventListener("resize", handleResize);
+  };
+  
+  const handleResize = () => {
+    // Debounce resize events
+    let resizeTimer;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      // Reinitialize the scroll animation
+      initScrollAnimation();
+    }, 250);
+  };
 
   return (
     <section ref={sectionRef} className="experiences-section bg-black text-white overflow-hidden">
@@ -126,7 +170,7 @@ onLeaveBack: () => console.log('Panel left back'),
         <div ref={panelsContainer} className="panels-container h-full">
           {features.map((feature, index) => (
             <div key={index} className="panel h-full flex items-center justify-center px-6 sm:px-10 md:px-16 lg:px-20">
-              <div className="panel-content-wrapper max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-8 md:gap-16">
+              <div className="panel-content-wrapper max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
                 <div className="panel-content w-full md:w-1/2 text-left space-y-6">
                   <div className="panel-number flex items-center">
                     <span className="text-cyan-400 text-5xl font-bold mr-4">{index + 1}</span>
