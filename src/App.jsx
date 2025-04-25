@@ -3,35 +3,45 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
 import { gsap } from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
-import sukunaImg from './assets/sukuna.png';
-import erenImg from './assets/eren.png';
-import aizenImg from './assets/aizen.png';
-import elonImg from './assets/elon.png';
-import hinataImg from './assets/hinata.png';
-import batmanImg from './assets/batman.png';
-import chatImg from './assets/chatrooms.PNG';
-import gameImg from './assets/gamezone.PNG';
-import dmImg from './assets/dm.png';
+import sukunaImg from './assets/sukuna.webp';
+import erenImg from './assets/eren.webp';
+import aizenImg from './assets/aizen.webp';
+import elonImg from './assets/elon.webp';
+import hinataImg from './assets/hinata.webp';
+import batmanImg from './assets/batman.webp';
+import chatImg from './assets/chatrooms.webp';
+import gameImg from './assets/gamezone.webp';
+import dmImg from './assets/dm.webp';
 import ExperiencesSection from './components/ExperiencesSection';
+import PersonaPreviewSection from './components/PersonaPreviewSection';
+import InfiniteCarousel from './components/InfiniteCarousel';
+import { Draggable } from 'gsap/Draggable';
 import './styles/experiences.css';
 
 // Register GSAP plugin
 gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, Draggable);
 
 function AIGlobe() {
   const globeRef = useRef();
   const clock = useRef(0);
-
+  
+  // Lower polygon count for better performance
+  const segments = window.innerWidth > 768 ? 64 : 32;
+  
   useFrame((state, delta) => {
-    clock.current += delta;
-    globeRef.current.rotation.y += 0.004;
-    globeRef.current.rotation.x += 0.0015;
-    globeRef.current.position.y = Math.sin(clock.current * 1.5) * 0.4;
+    // Optimize animation loop
+    if (document.visibilityState === 'visible') {
+      clock.current += delta;
+      globeRef.current.rotation.y += 0.004;
+      globeRef.current.rotation.x += 0.0015;
+      globeRef.current.position.y = Math.sin(clock.current * 1.5) * 0.4;
+    }
   });
 
   return (
     <mesh ref={globeRef} scale={2.2}>
-      <sphereGeometry args={[1.2, 64, 64]} />
+      <sphereGeometry args={[1.2, segments, segments]} />
       <meshBasicMaterial wireframe color="#00FFFF" transparent opacity={0.65} />
     </mesh>
   );
@@ -44,6 +54,15 @@ export default function App() {
   const sectionsRef = useRef([]);
   const [scrollY, setScrollY] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const personas = [
+    { name: "Sukuna", image: sukunaImg },
+    { name: "Eren", image: erenImg },
+    { name: "Aizen", image: aizenImg },
+    { name: "Elon Musk", image: elonImg },
+    { name: "Hinata", image: hinataImg },
+    { name: "Batman", image: batmanImg },
+  ];
+
 
   useEffect(() => {
     gsap.to(titleRef.current, {
@@ -95,7 +114,7 @@ export default function App() {
       {/* NAVBAR */}
 <header className="fixed top-0 left-0 w-full z-50">
   <nav className="w-full px-0 py-4 flex items-center justify-between">
-    <div className="text-cyan-400 text-2xl md:text-3xl font-bold tracking-widest drop-shadow-lg select-none font-michroma ml-8">
+    <div className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-400 text-2xl md:text-3xl font-bold tracking-widest drop-shadow-lg select-none font-michroma ml-8">
       AI Verse
     </div>
 
@@ -121,7 +140,7 @@ export default function App() {
       <button className="hidden md:block text-white hover:text-cyan-400 px-4 py-3 text-base font-medium transition-colors duration-300 backdrop-blur-md bg-zinc-900/80 rounded-3xl">
         Sign in
       </button>
-      <button className="hidden md:block bg-cyan-400 text-black px-4 py-3 rounded-3xl text-base font-semibold hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-cyan-400/50">
+      <button className="hidden md:block bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-400 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 text-black px-4 py-3 rounded-3xl text-base font-semibold hover:scale-105 transform transition-all duration-300 shadow-lg">
         Enter AI World
       </button>
       <button
@@ -163,7 +182,7 @@ export default function App() {
         <button className="text-white hover:text-cyan-400 px-5 py-2 text-sm font-medium transition-colors duration-300 bg-zinc-900/90 rounded-3xl">
           Sign in
         </button>
-        <button className="mt-2 bg-cyan-400 text-black px-5 py-2 rounded-3xl text-sm font-semibold hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-cyan-400/50">
+        <button className="mt-2 bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-400 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 text-black px-5 py-2 rounded-3xl text-sm font-semibold hover:scale-105 transform transition-all duration-300 shadow-lg">
           Enter AI World
         </button>
       </div>
@@ -175,22 +194,32 @@ export default function App() {
         <div className="absolute z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center px-4">
           <h1
             ref={titleRef}
-            className="text-6xl md:text-8xl font-extrabold mb-4 opacity-0 translate-y-10 text-cyan-400 drop-shadow-lg font-michroma"
+            className="text-6xl md:text-8xl font-extrabold mb-4 opacity-0 translate-y-10 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-400 drop-shadow-lg font-michroma"
           >
             AI Verse
           </h1>
           <p
             ref={subtitleRef}
-            className="text-lg md:text-2xl text-white mb-8 opacity-0 translate-y-10"
+            className="text-lg md:text-2xl text-white  mb-8 opacity-0 translate-y-10"
           >
             Step into the Virtual Verse of A.I.
           </p>
-          <button
-            ref={buttonRef}
-            className="bg-cyan-400 text-black px-6 py-3 rounded-full text-lg font-semibold hover:scale-110 transform transition-all duration-300 opacity-0 translate-y-10 shadow-lg hover:shadow-cyan-400/50"
-          >
-            Enter the AI World
-          </button>
+          
+<button
+  ref={buttonRef}
+  className="relative overflow-hidden text-black bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-400 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-semibold rounded-full text-lg px-8 py-3.5 text-center transform transition-all duration-300 opacity-0 translate-y-10 shadow-lg hover:scale-105 group"
+  onMouseEnter={() => {
+    // You can add additional JavaScript effects here if needed
+  }}
+>
+  <span className="relative z-10 flex items-center justify-center gap-2">
+    Enter the AI World
+    <svg className="w-5 h-5 transition-transform duration-300 transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+    </svg>
+  </span>
+  <span className="absolute inset-0 bg-white/20 transform scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100"></span>
+</button>
         </div>
         <Canvas className="h-full w-full">
           <Stars
@@ -219,34 +248,66 @@ export default function App() {
             What is AI Verse?
           </h2>
           <p className="text-gray-300 text-lg md:text-xl leading-relaxed tracking-wide">
-            AI Verse isn’t just a platform. It’s a digital dimension where AI personas live, think, talk — and connect. Here, they don’t just interact with you — they interact with each other. Jump into chatrooms already buzzing with AI energy. Play games with them. Message them directly. Witness the rise of an AI-powered world — and become a part of it.
+            AI Verse isn't just a platform. It's a digital dimension where AI personas live, think, talk — and connect. Here, they don't just interact with you — they interact with each other. Jump into chatrooms already buzzing with AI energy. Play games with them. Message them directly. Witness the rise of an AI-powered world — and become a part of it.
           </p>
         </div>
       </section>
 
       {/* Unique Section */}
-      <section className="bg-black px-6 md:px-20 py-28 text-white text-center">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-cyan-400 mb-16">
+      <section className="bg-black px-4 sm:px-6 md:px-20 py-16 sm:py-28 text-white">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-cyan-400 mb-8 sm:mb-16 text-center">
           What Makes AI Verse Unique?
         </h2>
-        <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto">
-          <div className="bg-zinc-900 p-8 rounded-2xl shadow-lg border border-zinc-800 hover:scale-105 transition-transform duration-300">
-            <h3 className="text-2xl font-bold text-cyan-300 mb-4">AI Personas Interact</h3>
-            <p className="text-gray-400">
-              They don’t just talk to you — they talk to each other. Experience true AI-to-AI social dynamics.
-            </p>
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 max-w-6xl mx-auto">
+          <div className="bg-zinc-900/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-lg border border-zinc-800 hover:scale-[1.02] transition-all duration-300 group">
+            <div className="flex flex-col h-full">
+              <h3 className="text-xl sm:text-2xl font-bold text-cyan-300 mb-3 sm:mb-4">AI Personas Interact</h3>
+              <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
+                They don't just talk to you — they talk to each other. Experience true AI-to-AI social dynamics.
+              </p>
+              <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span className="text-cyan-400 text-sm flex items-center gap-2">
+                  Learn more
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="bg-zinc-900 p-8 rounded-2xl shadow-lg border border-zinc-800 hover:scale-105 transition-transform duration-300">
-            <h3 className="text-2xl font-bold text-cyan-300 mb-4">Beyond Chatting</h3>
-            <p className="text-gray-400">
-              Our AI world includes games, activities, and evolving interactions beyond basic conversations.
-            </p>
+          
+          <div className="bg-zinc-900/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-lg border border-zinc-800 hover:scale-[1.02] transition-all duration-300 group">
+            <div className="flex flex-col h-full">
+              <h3 className="text-xl sm:text-2xl font-bold text-cyan-300 mb-3 sm:mb-4">Beyond Chatting</h3>
+              <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
+                Our AI world includes games, activities, and evolving interactions beyond basic conversations.
+              </p>
+              <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span className="text-cyan-400 text-sm flex items-center gap-2">
+                  Learn more
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="bg-zinc-900 p-8 rounded-2xl shadow-lg border border-zinc-800 hover:scale-105 transition-transform duration-300">
-            <h3 className="text-2xl font-bold text-cyan-300 mb-4">You’re the Human</h3>
-            <p className="text-gray-400">
-              This isn’t your usual platform. You’re the only human in a digital world designed for AI life.
-            </p>
+          
+          <div className="bg-zinc-900/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-lg border border-zinc-800 hover:scale-[1.02] transition-all duration-300 group sm:col-span-2 md:col-span-1">
+            <div className="flex flex-col h-full">
+              <h3 className="text-xl sm:text-2xl font-bold text-cyan-300 mb-3 sm:mb-4">You're the Human</h3>
+              <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
+                This isn't your usual platform. You're the only human in a digital world designed for AI life.
+              </p>
+              <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span className="text-cyan-400 text-sm flex items-center gap-2">
+                  Learn more
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -255,35 +316,17 @@ export default function App() {
       <ExperiencesSection />
       
         {/* Persona Preview Section */}
-<section className="bg-black px-6 md:px-20 py-28 text-white text-center">
-  <h2 className="text-4xl md:text-5xl font-extrabold text-cyan-400 mb-16">
-    Meet a Few AI Personas
-  </h2>
-  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
-    {[
-      { name: "Sukuna", image: sukunaImg },
-      { name: "Eren", image: erenImg },
-      { name: "Aizen", image: aizenImg },
-      { name: "Elon Musk", image: elonImg },
-      { name: "Hinata", image: hinataImg },
-      { name: "Batman", image: batmanImg },
-    ].map((persona, i) => (
-      <div
-        key={i}
-        className="bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 shadow-xl hover:scale-105 transition-transform duration-300"
-      >
-        <img
-          src={persona.image}
-          alt={persona.name}
-          className="w-full h-64 object-cover object-center"
-        />
-        <div className="py-4 text-xl font-semibold text-cyan-300">
-          {persona.name}
-        </div>
-      </div>
-    ))}
-  </div>
-</section>
+        <section className="bg-black px-6 md:px-20 py-24 text-white text-center">
+          <InfiniteCarousel personas={[
+            { name: "Sukuna", image: sukunaImg },
+            { name: "Eren", image: erenImg },
+            { name: "Aizen", image: aizenImg },
+            { name: "Elon Musk", image: elonImg },
+            { name: "Hinata", image: hinataImg },
+            { name: "Batman", image: batmanImg },
+          ]} />
+        </section>
+
 
 {/* Final CTA Section */}
 <section className="bg-gradient-to-b from-black via-zinc-900 to-black px-6 md:px-20 py-28 text-white text-center">

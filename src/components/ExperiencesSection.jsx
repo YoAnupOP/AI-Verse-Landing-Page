@@ -1,9 +1,10 @@
+/*Experience Section Component*/
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
-import chatImg from '../assets/chatrooms.PNG';
-import gameImg from '../assets/gamezone.PNG';
-import dmImg from '../assets/dm.png';
+import chatImg from '../assets/chatrooms.webp';
+import gameImg from '../assets/gamezone.webp';
+import dmImg from '../assets/dm.webp';
 
 // Make sure GSAP ScrollTrigger is registered
 gsap.registerPlugin(ScrollTrigger);
@@ -62,6 +63,12 @@ const ExperiencesSection = () => {
           snap: 1 / (totalPanels - 1),
           start: "top top",
           end: () => `+=${window.innerWidth * (totalPanels - 1)}`,
+          // Add this to your ScrollTrigger setup in ExperiencesSection:
+        markers: false,  // Set to true for debugging
+onEnter: () => console.log('Panel entered'),
+onLeave: () => console.log('Panel left'),
+onEnterBack: () => console.log('Panel entered back'),
+onLeaveBack: () => console.log('Panel left back'),
           invalidateOnRefresh: true
         }
       });
@@ -137,7 +144,8 @@ const ExperiencesSection = () => {
                 </div>
                 <div className="panel-image w-full md:w-1/2">
                   <div className="rounded-xl overflow-hidden border-2 border-cyan-400/20 shadow-lg shadow-cyan-400/10">
-                    <img 
+                    <img
+                      loading="lazy"
                       src={feature.image} 
                       alt={feature.title} 
                       className="w-full h-auto object-cover"
