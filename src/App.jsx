@@ -87,20 +87,38 @@ export default function App() {
     });
 
     sectionsRef.current.forEach((section, index) => {
-      gsap.fromTo(
-        section,
-        { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1.2,
-          scrollTrigger: {
-            trigger: section,
-            start: "top 80%",
-            toggleActions: "play none none none",
-          },
-        }
-      );
+      if (!section) return;
+      if (index === 0) {
+        // Only animate y for About section, not opacity
+        gsap.fromTo(
+          section,
+          { y: 50 },
+          {
+            y: 0,
+            duration: 1.2,
+            scrollTrigger: {
+              trigger: section,
+              start: "top 80%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      } else {
+        gsap.fromTo(
+          section,
+          { opacity: 0, y: 50 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1.2,
+            scrollTrigger: {
+              trigger: section,
+              start: "top 80%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
     });
 
     const handleScroll = () => setScrollY(window.scrollY);
@@ -221,7 +239,8 @@ export default function App() {
   <span className="absolute inset-0 bg-white/20 transform scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100"></span>
 </button>
         </div>
-        <Canvas className="h-full w-full">
+        {/* Make Canvas absolutely positioned and behind content */}
+        <Canvas className="absolute inset-0 h-full w-full z-0">
           <Stars
             radius={100}
             depth={60}
@@ -241,7 +260,7 @@ export default function App() {
       {/* About Section */}
       <section
         ref={(el) => (sectionsRef.current[0] = el)}
-        className="relative px-6 md:px-20 py-32 bg-black text-white text-center overflow-hidden"
+        className="relative z-20 px-6 md:px-20 py-32 bg-black text-white text-center overflow-hidden"
       >
         <div className="max-w-4xl mx-auto">
           <h2 className="text-5xl md:text-6xl font-extrabold text-cyan-400 mb-6 drop-shadow-md">
